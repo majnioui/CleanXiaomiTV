@@ -145,8 +145,6 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     // scroll moves the glass in lockstep with its tile instead of becoming a moving spring target.
     private float glassScrollShift;
     private boolean glassShown;
-    /** Advanced effects (Config, or the Settings menu): the focused tile lifts, zooms and gets a bright edge. */
-    private boolean advancedEffects;
     // Static so they survive the activity being destroyed while another app is open (low-memory TVs,
     // or Developer options → "Don't keep activities"); they only reset when the process dies.
     private static int lastFocused = 0;
@@ -174,6 +172,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     private Dialog cardPrompt;
     /** Set when a decision could not be saved: no more prompts until the next resume, instead of asking in a loop. */
     private boolean promptsPaused;
+    /** Between onStart and onStop: Home is (at least partly) on screen. */
+    private boolean started;
     /** Rebuild the tiles on the way back to Home only when apps changed meanwhile (TileRefresh). */
     private final TileRefresh tileRefresh = new TileRefresh();
     /** PackageManager's change counter at the last rebuild, to catch a package broadcast that never arrived. */
@@ -249,9 +249,10 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         density = getResources().getDisplayMetrics().density;
         // config.xml, overlaid by config.json from a pushed theme (see Config and tools/theme.sh).
         Config cfg = Config.load(this);
+        // A force stop (TV Manager's cleaner) or a reinstall turns the remote's key helpers off; put them back.
+        if (getResources().getBoolean(R.bool.restore_key_services)) ServiceRepair.restore(this);
         COLUMNS = cfg.columns;
         GRID_COLUMNS = cfg.gridColumns;
-        advancedEffects = cfg.advancedEffects;
         liveTvPkg = cfg.liveTvPackage;
         liveTvAction = cfg.liveTvAction;
         inputAction = cfg.inputAction;
@@ -404,8 +405,7 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
             }
         });
         for (SpringAnimation s : new SpringAnimation[]{springX, springY}) {
-            s.setSpring(new SpringForce().setStiffness(advancedEffects ? 320f : 260f)
-                    .setDampingRatio(advancedEffects ? 0.76f : 0.58f));
+            s.setSpring(new SpringForce().setStiffness(260f).setDampingRatio(0.58f));
         }
 
         btnInputs = findViewById(R.id.btnInputs);
@@ -418,12 +418,6 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         });
         // Liquid glass top buttons: the blurred photo behind them; solid white while focused.
         for (View pill : new View[] {btnInputs, btnWifi, btnSettings}) pill.setBackground(glassPill(pill));
-        if (advancedEffects) {
-            for (View pill : new View[] {btnInputs, btnWifi, btnSettings}) {
-                pill.setOnFocusChangeListener((view, focused) -> view.animate()
-                        .scaleX(focused ? 1.08f : 1f).scaleY(focused ? 1.08f : 1f).setDuration(180).start());
-            }
-        }
         if (cfg.nowPlaying) {
             nowCard = new NowPlayingCard(this, backdrop, getResources().getFont(R.font.outfit),
                     new NowPlayingCard.Exits() {
@@ -544,7 +538,9 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     protected void onStart() {
         super.onStart();
+        started = true;
         tileRefresh.onStart();
+        if (grid.getAdapter() == null) grid.setAdapter(adapter);   // dropped by onTrimMemory
     }
 
     @Override
@@ -677,7 +673,27 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
     @Override
     protected void onStop() {
         super.onStop();
+        started = false;
         tileRefresh.onStop();
+    }
+
+    /**
+     * Another app needs the memory while Home is in the background: let go of every tile's artwork, and
+     * rebuild it when Home comes back. Not at UI_HIDDEN, the ordinary trip to an app, where keeping the
+     * tiles is what makes the return instant.
+     */
+    @Override
+    public void onTrimMemory(int level) {
+        super.onTrimMemory(level);
+        // RUNNING_LOW and CRITICAL also arrive while Home is visible, as the key helpers keep the process in
+        // the foreground; never blank the screen the owner is looking at.
+        if (!MemoryTrimPolicy.shouldRelease(level, started)) return;
+        adapter.clear();
+        // Detach the adapter too: with Home stopped no layout pass runs, so the tile views (and the bitmaps
+        // they hold) would stay attached until Home comes back. setAdapter(null) recycles them now.
+        grid.setAdapter(null);
+        grid.getRecycledViewPool().clear();
+        tileRefresh.invalidate();
     }
 
     @Override
@@ -731,11 +747,11 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         Rect r = new Rect(0, 0, card.getWidth(), card.getHeight());
         root.offsetDescendantRectToMyCoords(card, r);
         float pad = 6f * density;        // matches GlassView's glow inset
-        float scale = adapter.focusScale();
+        float scale = AppAdapter.FOCUS_SCALE;
         float w = card.getWidth() * scale + 2 * pad;
         float h = card.getHeight() * scale + 2 * pad;
         float x = r.exactCenterX() - w / 2f;
-        float y = r.exactCenterY() - h / 2f - (advancedEffects ? AppAdapter.LIFT_DP * density : 0f);   // follows the lifted tile
+        float y = r.exactCenterY() - h / 2f;
 
         ViewGroup.LayoutParams lp = glass.getLayoutParams();
         if (lp.width != (int) w || lp.height != (int) h) {
@@ -1011,20 +1027,17 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         addSettingsRow(rows, popup, R.drawable.ic_edit_dock, R.string.dock_list, 4);
         addSettingsRow(rows, popup, R.drawable.ic_settings, R.string.system_settings, 2);
         if (moduleCards) addSettingsRow(rows, popup, R.drawable.ic_home_settings, R.string.module_cards, 3);
-        // Layout and effects (Config.setChoice / setToggle): applied when the menu closes, by rebuilding Home.
+        // Layout (Config.setChoice): applied when the menu closes, by rebuilding Home.
         addSeparator(rows);
         Config cfg = Config.load(this);
-        final int[] layout = {cfg.gridColumns, cfg.advancedEffects ? 1 : 0};
+        final int[] layout = {cfg.gridColumns};
         final int[] atOpen = layout.clone();
         addChoiceRow(rows, R.drawable.ic_home_settings, R.string.apps_per_row,
                 () -> String.valueOf(layout[0]), () -> layout[0] = layout[0] >= 7 ? 4 : Math.max(4, layout[0] + 1));
-        addChoiceRow(rows, R.drawable.ic_clock, R.string.advanced_effects,
-                () -> getString(layout[1] == 1 ? R.string.toggle_on : R.string.toggle_off), () -> layout[1] = 1 - layout[1]);
         popup.setOnDismissListener(() -> {
             if (openPopup == popup) openPopup = null;   // replaces glassPopup's listener
             if (java.util.Arrays.equals(layout, atOpen)) return;
             Config.setChoice(this, Config.GRID_COLUMNS, layout[0]);
-            Config.setToggle(this, Config.ADVANCED_EFFECTS, layout[1] == 1);
             recreate();
         });
         // Switches that stay on the TV (Config.setToggle); the screensaver reads them when it next starts.
@@ -1157,8 +1170,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         reorderHint.animate().alpha(1f).translationY(0f).setDuration(180).start();
         View card = tileCardAt(position);
         if (card != null) {
-            card.animate().scaleX(adapter.focusScale() * 1.06f)
-                    .scaleY(adapter.focusScale() * 1.06f)
+            card.animate().scaleX(AppAdapter.FOCUS_SCALE * 1.06f)
+                    .scaleY(AppAdapter.FOCUS_SCALE * 1.06f)
                     .setDuration(180).start();
         }
     }
@@ -1268,8 +1281,8 @@ public class MainActivity extends Activity implements AppAdapter.TileListener {
         if (!reorderMode) return;
         View selectedCard = tileCardAt(reorderPosition);
         if (selectedCard != null) {
-            selectedCard.animate().scaleX(adapter.focusScale())
-                    .scaleY(adapter.focusScale())
+            selectedCard.animate().scaleX(AppAdapter.FOCUS_SCALE)
+                    .scaleY(AppAdapter.FOCUS_SCALE)
                     .setDuration(160).start();
         }
         reorderMode = false;

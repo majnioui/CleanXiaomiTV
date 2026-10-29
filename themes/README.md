@@ -32,7 +32,6 @@ is ignored, and a file that doesn't parse is ignored as a whole, so a theme can 
 | `grid_columns` | 1 to 8 | Tiles per grid row below the dock; same as `columns` if left out |
 | `rows_below_dock` | 0 to 3 | Grid rows left visible under the dock |
 | `dock_opacity` | 0 to 100 | How opaque the dock band's glass is over the photo or wallpaper: 100 is the solid frosted band, lower shows more of the picture (55 by default) |
-| `advanced_effects` | bool | The focused tile lifts with a shadow, zooms a little more, its picture zooms and it gets a bright edge; the top buttons zoom on focus and apps open with a soft transition (`false` by default) |
 | `shamsi_date` | bool | Show the Solar Hijri date above the Gregorian one |
 | `dream_athkar` | bool | Adhkar at the bottom of the Clock screensaver, a new one every minute |
 | `home_prayer` | bool | Next prayer and a countdown in a glass pill under the clock, at the weather coordinates (Aladhan) |

@@ -52,7 +52,7 @@ done
 tools/venv/bin/python -I tools/tv.py 'settings put secure screensaver_components com.majnioui.cleanxiaomitv/com.gathin.tvhome.ClockDream; settings put secure screensaver_enabled 1'
 ```
 
-`INPUT_KEY_SERVICE=1` keeps the remote's Input button working once the stock home is gone, and on Xiaomi remotes the YouTube and Apps buttons too; Android switches it off on every reinstall, so pass it each time. `PRIVATE_DNS=off` skips the AdGuard DNS.
+`INPUT_KEY_SERVICE=1` keeps the remote's Input button working once the stock home is gone, and on Xiaomi remotes the YouTube, Apps and Settings buttons too. Android switches it off when the launcher is force-stopped (a cleaner app, Settings); Home turns it back on when it starts (`restore_key_services` in config.xml). Passing it on every install does no harm. `PRIVATE_DNS=off` skips the AdGuard DNS.
 
 ## Configure
 

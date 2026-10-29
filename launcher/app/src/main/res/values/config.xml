@@ -83,11 +83,6 @@
     <!-- How opaque the dock band's glass is over the photo or wallpaper, 0 to 100: 100 is the solid frosted
          band, lower lets more of the picture show through. -->
     <integer name="dock_opacity">55</integer>
-    <!-- Advanced effects: the focused tile lifts with a shadow, zooms a little more, its picture zooms and it gets a
-         bright edge; the top buttons zoom on focus and apps open with a soft transition. Also on the TV (Settings
-         menu), which wins over this file and a theme. -->
-    <bool name="advanced_effects">false</bool>
-
     <!-- Dock slots. Tiles are 180dp wide at 4 and shrink to fit from 5 up (about 144dp at 5, 117dp at 6 on a
          1080p TV). -->
     <integer name="columns">4</integer>
@@ -97,6 +92,12 @@
     <!-- "Default home" tile that opens Android's home-screen picker, for TVs whose settings have one
          (most Android TVs don't; the tile only appears when the page exists). Off by default. -->
     <bool name="show_home_settings_shortcut">false</bool>
+
+    <!-- Android turns the remote's key helpers (InputKeyService, HomeKeyService) off when the launcher is
+         force-stopped (TV Manager's memory cleaner, Settings, am force-stop). true: Home puts back the helpers
+         that were running when it starts again; one turned off in Settings stays off. Needs WRITE_SECURE_SETTINGS,
+         which build-and-install grants. -->
+    <bool name="restore_key_services">true</bool>
 
     <!-- Module cards: an app that declares a card (docs/specs/card.md) can stand in for its tile with its own
          label, caption and glow colour, once you answer Show on the prompt. false: never look for cards or ask. -->

@@ -62,6 +62,7 @@ printf '%s\n' \
   "pm install -r /data/local/tmp/tvhome.apk" \
   "rm -f /data/local/tmp/tvhome.apk" \
   "pm grant com.majnioui.cleanxiaomitv android.permission.ACCESS_FINE_LOCATION 2>/dev/null; echo location-granted" \
+  "pm grant com.majnioui.cleanxiaomitv android.permission.WRITE_SECURE_SETTINGS 2>/dev/null; echo key-helper-repair-granted" \
   "cmd notification allow_listener com.majnioui.cleanxiaomitv/com.gathin.tvhome.MediaListener; echo now-playing-allowed" \
   "cmd package compile -m speed -f com.majnioui.cleanxiaomitv" \
   "am start -W -n com.majnioui.cleanxiaomitv/com.gathin.tvhome.MainActivity | grep -E '^(Status|Error)'" \
@@ -93,11 +94,12 @@ if [ "$PRIVATE_DNS" != off ]; then
   "$PY" -I ../tools/tv.py "settings put global private_dns_specifier $PRIVATE_DNS; settings put global private_dns_mode hostname; echo Private DNS: $PRIVATE_DNS"
 fi
 
-# Optional accessibility services. Off unless asked for, and Android switches them off again on
-# every reinstall, so pass the flag each time you run this script.
+# Optional accessibility services. Off unless asked for. Android switches them off on a force stop
+# or a reinstall; with restore_key_services (config.xml) Home puts back the ones that were running.
 #   INPUT_KEY_SERVICE=1   the remote's Input button (KEYCODE_TV) opens the input switcher from any
 #                         app; Google TV needs this once the stock launcher is gone (InputKeyService).
-#                         Also makes Xiaomi remotes' YouTube and Apps buttons open YouTube and the launcher
+#                         Also makes Xiaomi remotes' YouTube, Apps and Settings buttons open YouTube, the
+#                         launcher and the TV's Settings
 #   HOME_KEY_SERVICE=1    remotes whose Home button sends KEYCODE_ALL_APPS instead of HOME, e.g. Xiaomi
 #                         sticks: the key is routed to the launcher (HomeKeyService)
 enable_service() {   # appends to enabled_accessibility_services without dropping other services

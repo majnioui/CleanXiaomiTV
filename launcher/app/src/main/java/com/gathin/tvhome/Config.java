@@ -46,8 +46,6 @@ final class Config {
     final int rowsBelowDock;
     /** How opaque the dock band's glass is, 0 to 100 (config.xml, dock_opacity); lower shows more of the photo. */
     final int dockOpacity;
-    /** The focused tile lifts, zooms and gets a bright edge, and apps open with a soft transition (advanced_effects). */
-    final boolean advancedEffects;
     final boolean shamsiDate;
     final boolean dreamAthkar;
     /** Today's prayer times under the clock on Home, and on the screensaver; at the weather coordinates. */
@@ -77,7 +75,6 @@ final class Config {
     private Config(List<String> dockApps, List<String> hiddenApps, String liveTvPackage, String liveTvAction,
                    String sourcePanelService, String sourcePanelAction, String inputAction,
                    int columns, int gridColumns, int rowsBelowDock, int dockOpacity,
-                   boolean advancedEffects,
                    boolean shamsiDate, boolean dreamAthkar, boolean homePrayer, boolean dreamPrayer, boolean dreamAnalog, int prayerMethod, boolean dreamPhotos, boolean nowPlaying, boolean homePhoto, boolean moduleCards, String vpnApp,
                    String weatherLatitude, String weatherLongitude, String weatherPlace, boolean showHomeSettingsShortcut, int backgroundColor,
                    File wallpaper, boolean overlayApplied) {
@@ -92,7 +89,6 @@ final class Config {
         this.gridColumns = gridColumns;
         this.rowsBelowDock = rowsBelowDock;
         this.dockOpacity = dockOpacity;
-        this.advancedEffects = advancedEffects;
         this.shamsiDate = shamsiDate;
         this.dreamAthkar = dreamAthkar;
         this.homePrayer = homePrayer;
@@ -131,7 +127,6 @@ final class Config {
         int gridColumns = res.getInteger(R.integer.grid_columns);
         int rowsBelow = res.getInteger(R.integer.rows_below_dock);
         int dockOpacity = res.getInteger(R.integer.dock_opacity);
-        boolean advancedEffects = res.getBoolean(R.bool.advanced_effects);
         boolean shamsi = res.getBoolean(R.bool.shamsi_date);
         boolean athkar = res.getBoolean(R.bool.dream_athkar);
         boolean homePrayer = res.getBoolean(R.bool.home_prayer);
@@ -167,7 +162,6 @@ final class Config {
             gridColumns = integer(json, "grid_columns", json.has("columns") ? columns : gridColumns, 1, 8);
             rowsBelow = integer(json, "rows_below_dock", rowsBelow, 0, 3);
             dockOpacity = integer(json, "dock_opacity", dockOpacity, 0, 100);
-            advancedEffects = bool(json, "advanced_effects", advancedEffects);
             shamsi = bool(json, "shamsi_date", shamsi);
             athkar = bool(json, "dream_athkar", athkar);
             homePrayer = bool(json, "home_prayer", homePrayer);
@@ -193,7 +187,6 @@ final class Config {
         dreamAnalog = toggles.getBoolean(DREAM_ANALOG, dreamAnalog);
         int chosenColumns = toggles.getInt(GRID_COLUMNS, 0);
         if (chosenColumns >= 4 && chosenColumns <= 7) gridColumns = chosenColumns;
-        advancedEffects = toggles.getBoolean(ADVANCED_EFFECTS, advancedEffects);
 
         File wallpaper = dir != null ? new File(dir, WALLPAPER_NAME) : null;
         if (wallpaper != null && !(wallpaper.isFile() && wallpaper.length() > 0)) wallpaper = null;
@@ -202,14 +195,14 @@ final class Config {
 
         return new Config(dock, hidden, liveTv, liveTvAction, panelService, panelAction, inputAction,
                 Math.max(1, columns), Math.max(1, gridColumns), Math.max(0, rowsBelow), Math.max(0, Math.min(100, dockOpacity)),
-                advancedEffects, shamsi, athkar, homePrayer, dreamPrayer, dreamAnalog, prayerMethod, photos, playing, homePhoto, moduleCards, vpn,
+                shamsi, athkar, homePrayer, dreamPrayer, dreamAnalog, prayerMethod, photos, playing, homePhoto, moduleCards, vpn,
                 weatherLat, weatherLon, weatherPlace, homeSettings, background,
                 wallpaper, applied);
     }
 
     /** Keys of the switches in the Settings menu; the same names as in config.xml and config.json. */
     static final String DREAM_ATHKAR = "dream_athkar", HOME_PRAYER = "home_prayer", DREAM_PRAYER = "dream_prayer",
-            DREAM_ANALOG = "dream_analog", GRID_COLUMNS = "grid_columns", ADVANCED_EFFECTS = "advanced_effects";
+            DREAM_ANALOG = "dream_analog", GRID_COLUMNS = "grid_columns";
 
     private static SharedPreferences toggles(Context ctx) {
         return ctx.getSharedPreferences("toggles", Context.MODE_PRIVATE);

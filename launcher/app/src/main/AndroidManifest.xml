@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools">
 
     <uses-feature android:name="android.software.leanback" android:required="false" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
@@ -12,6 +13,10 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <!-- Weather on the home screen (Open-Meteo, see config.xml). -->
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Puts the remote's key helpers back after a force stop (restore_key_services, ServiceRepair); a
+         development permission, granted over adb at install time. -->
+    <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS"
+        tools:ignore="ProtectedPermissions" />
 
     <!-- Android 11+ package visibility: lets the launcher list the TV apps it shows as tiles, and the
          apps that declare a module card (docs/specs/card.md). -->
@@ -61,6 +66,21 @@
             android:taskAffinity=""
             android:excludeFromRecents="true"
             android:theme="@android:style/Theme.NoDisplay" />
+        <!-- market://launch?id=<package>, the "open this app" link other apps and phone remotes send, which
+             the stock launcher normally answers; see AppLaunchActivity. -->
+        <activity
+            android:name=".AppLaunchActivity"
+            android:exported="true"
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@android:style/Theme.NoDisplay">
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="market" android:host="launch" />
+            </intent-filter>
+        </activity>
         <!-- Home button for remotes that send KEYCODE_ALL_APPS (Xiaomi). Opt-in: HOME_KEY_SERVICE=1
              build-and-install.sh; see HomeKeyService. -->
         <service
@@ -100,7 +120,7 @@
             </intent-filter>
         </service>
 
-        <!-- The remote's Input, YouTube and Apps buttons; see InputKeyService. -->
+        <!-- The remote's Input, YouTube, Apps and Settings buttons; see InputKeyService. -->
         <service
             android:name=".InputKeyService"
             android:exported="false"

@@ -24,5 +24,4 @@
     <string name="dock_edit_place_hint">MODIFIER LE DOCK  •  CHOISISSEZ UNE PLACE, PUIS OK  •  RETOUR POUR QUITTER</string>
     <string name="dock_edit_app_hint">MODIFIER LE DOCK  •  CHOISISSEZ L\'APP POUR CETTE PLACE, PUIS OK  •  RETOUR</string>
     <string name="apps_per_row">Apps par ligne</string>
-    <string name="advanced_effects">Effets avancés</string>
 </resources>

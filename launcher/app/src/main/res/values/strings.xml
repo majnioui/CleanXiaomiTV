@@ -39,7 +39,7 @@
     <string name="vpn_off">VPN off</string>
     <string name="home_settings">Default home</string>
     <string name="home_settings_help">Choose a home screen in system settings, then press Home.</string>
-    <string name="input_key_service_description">Opens the input switcher, YouTube or this launcher when the remote\'s Input, YouTube or Apps button is pressed.</string>
+    <string name="input_key_service_description">Opens the input switcher, YouTube, this launcher or the TV\'s Settings when the remote\'s Input, YouTube, Apps or Settings button is pressed.</string>
     <string name="home_key_name">Home button</string>
     <string name="home_key_description">Makes the remote\'s Home button open this launcher.</string>
     <string name="card_prompt_title">New card from %1$s</string>
@@ -81,5 +81,4 @@
     <string name="dock_edit_place_hint">EDIT DOCK  •  CHOOSE A PLACE, THEN OK  •  BACK EXIT</string>
     <string name="dock_edit_app_hint">EDIT DOCK  •  CHOOSE THE APP FOR THIS PLACE, THEN OK  •  BACK</string>
     <string name="apps_per_row">Apps per row</string>
-    <string name="advanced_effects">Advanced effects</string>
 </resources>

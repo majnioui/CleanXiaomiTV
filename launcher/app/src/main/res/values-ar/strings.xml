@@ -39,7 +39,7 @@
     <string name="vpn_off">VPN متوقف</string>
     <string name="home_settings">الشاشة الرئيسية الافتراضية</string>
     <string name="home_settings_help">اختر شاشة رئيسية من إعدادات النظام، ثم اضغط على زر الرئيسية.</string>
-    <string name="input_key_service_description">يفتح قائمة المدخلات عند الضغط على زر المدخلات في جهاز التحكم.</string>
+    <string name="input_key_service_description">يفتح قائمة المدخلات أو يوتيوب أو هذه الواجهة أو إعدادات التلفاز عند الضغط على زر المدخلات أو يوتيوب أو التطبيقات أو الإعدادات في جهاز التحكم.</string>
     <string name="home_key_name">زر الرئيسية</string>
     <string name="home_key_description">يجعل زر الرئيسية في جهاز التحكم يفتح هذه الشاشة.</string>
     <string name="card_prompt_title">بطاقة جديدة من %1$s</string>
@@ -81,5 +81,4 @@
     <string name="dock_edit_place_hint">تعديل الشريط  •  اختر مكانًا ثم OK  •  رجوع للخروج</string>
     <string name="dock_edit_app_hint">تعديل الشريط  •  اختر التطبيق لهذا المكان ثم OK  •  رجوع</string>
     <string name="apps_per_row">التطبيقات في كل صف</string>
-    <string name="advanced_effects">مؤثرات متقدمة</string>
 </resources>
